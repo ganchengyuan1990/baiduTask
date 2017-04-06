@@ -21,7 +21,7 @@
     Vue.prototype = {
         constructor: Vue,
         init: (el, data) => {
-        //   判断是否有textContent属性
+            //   判断是否有textContent属性
             if (!('textContent' in document)) {
                 console.log('Please upgrade your browser！');
                 return
@@ -33,7 +33,7 @@
                 if (entrance instanceof HTMLElement) {
                     let children = entrance.childNodes;
                     let len = entrance.childNodes.length;
-                    for (let i = 0; i < len; i++) {
+                    for (let i = len - 1; i >= 0; i--) {
                         if (children[i].childNodes.length > 0) {
                             translate(children[i], reg, value)
                         } else {
@@ -84,7 +84,6 @@
             }
         }
     });
-
 
 </script>
 </body>
