@@ -21,7 +21,7 @@
     Vue.prototype = {
         constructor: Vue,
         init: (el, data) => {
-//            判断是否有textContent属性
+        //   判断是否有textContent属性
             if (!('textContent' in document)) {
                 console.log('Please upgrade your browser！');
                 return
