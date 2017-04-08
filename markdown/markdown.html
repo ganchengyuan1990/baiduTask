@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>简易markdown</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        html, body {
+            height: 100%;
+            font-size: 14px;
+            font-family: -apple-system, "SF UI Text", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+        }
+
+        .left-wrapper, .right-wrapper {
+            float: left;
+            overflow: auto;
+            width: 50%;
+            height: 100%;
+        }
+
+        .left-wrapper {
+            padding-top: 20px;
+            box-sizing: border-box;
+            border-right: 1px solid #d9d9d9;
+            background: #fff;
+        }
+
+        .right-wrapper {
+            box-sizing: border-box;
+            background: #fcfaf2;
+        }
+
+        #titleInput {
+            overflow: hidden;
+            padding: 0 30px 10px 40px;
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 20px;
+            font-size: 30px;
+            color: #555;
+            text-overflow: ellipsis;
+            font-weight: normal;
+            border-style: none;
+            outline: none;
+        }
+
+        .tools {
+            width: 100%;
+            height: 30px;
+            border-bottom: 1px solid #d9d9d9;
+            background-color: #dedede;
+        }
+
+        #articleInput {
+            padding: 40px 40px 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            line-height: 30px;
+            font-size: 18px;
+            color: #2f2f2f;
+            outline: none;
+            border-style: none;
+            resize: none;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        }
+
+        .output {
+            overflow-y: auto;
+            padding: 40px 40px 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            color: #2f2f2f;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        #output-title {
+            margin-bottom: 20px;
+        }
+
+        #output-article {
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+<div class="left-wrapper">
+    <input type="text" id="titleInput" value="无标题文章">
+    <ul class="tools"></ul>
+    <textarea name="article_Input" id="articleInput"></textarea>
+</div>
+<div class="right-wrapper">
+    <div class="output">
+        <h1 id="output-title"></h1>
+        <div id="output-article"></div>
+    </div>
+</div>
+<script>
+    window.onload = () => {
+        let titleInput = document.getElementById('titleInput');
+        let articleInput = document.getElementById('articleInput');
+        let titleOutput = document.getElementById('output-title');
+        let articleOutput = document.getElementById('output-article')
+//          默认选中方便用户删除
+        titleInput.select();
+//          节流函数避免连续触发事件
+        let throttle = (method, context) => {
+            method.tId && clearTimeout(method.tId);
+            method.tId = setTimeout(function () {
+                method.call(context);
+            }, 140);
+        };
+//          输出标题的函数
+        let addTitle = () => {
+            titleOutput.innerHTML = titleInput.value;
+        };
+//          输出默认的占位符
+        addTitle();
+
+//          绑定按下键盘触发，keypress对功能键、中文输入法没有反应
+        titleInput.addEventListener('keyup', () => {
+            throttle(addTitle);
+        });
+//         输出文章的函数
+        let addArticle = () => {
+                articleOutput.innerHTML = articleInput.value;
+                let reg1 = /#{1,6}(?=[^#]+\n)/g;
+                let len;
+                let reg2;
+                let reg3;
+                if (articleInput.value.match(reg1)) {
+                    let matchs = articleInput.value.match(reg1);
+                    len = matchs.length;
+                    console.log(matchs);
+                    console.log(len);
+                    for (let i = 0; i < len; i++) {
+                        reg3 = new RegExp(`(^|>)#{${matchs[i].length}}(?=[^#]+\\n)`, 'g');
+                        console.log(reg3);
+                        reg2 = new RegExp(`(<h${matchs[i].length}>.*)\\n`,'g');
+                        console.log(reg2);
+                        articleOutput.innerHTML = articleOutput.innerHTML.replace(reg3, `$1<h${matchs[i].length}>`).replace(reg2, `$1</h${matchs[i].length}>`);
+                    }
+                }
+            };
+
+
+//          绑定按下键盘触发
+        articleInput.addEventListener('keyup', () => {
+            throttle(addArticle);
+        })
+
+    }
+</script>
+</body>
+</html>
