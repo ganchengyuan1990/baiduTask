@@ -9,10 +9,6 @@
             margin: 0;
         }
 
-        li {
-            list-style: none;
-        }
-
         html, body {
             height: 100%;
             font-size: 14px;
@@ -84,12 +80,38 @@
             line-height: 1.7;
         }
 
-        #output-title {
+        #title-output {
             margin-bottom: 20px;
         }
 
-        #output-article {
+        #articleOutput {
             word-wrap: break-word;
+        }
+
+        #articleOutput li {
+            position: relative;
+            left: 40px;
+        }
+
+        #articleOutput pre {
+            overflow: auto;
+            margin-bottom: 20px;
+            padding: 9.5px;
+            font-size: 13px;
+            line-height: 20px;
+            color: #657b83;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            background: #f6f6f6;
+        }
+
+        #articleOutput blockquote {
+            padding: 20px;
+            margin-bottom: 25px;
+            font-size: 16px;
+            font-weight: normal;
+            line-height: 30px;
+            background-color: whitesmoke;
+            border-left: 6px solid #b4b4b4;
         }
     </style>
 </head>
@@ -101,24 +123,25 @@
 </div>
 <div class="right-wrapper">
     <div class="output">
-        <h1 id="output-title"></h1>
-        <div id="output-article"></div>
+        <h1 id="title-output"></h1>
+        <div id="articleOutput"></div>
     </div>
 </div>
 <script>
     window.onload = () => {
+//          获取到对应的输入输出节点
         let titleInput = document.getElementById('titleInput');
         let articleInput = document.getElementById('articleInput');
-        let titleOutput = document.getElementById('output-title');
-        let articleOutput = document.getElementById('output-article')
+        let titleOutput = document.getElementById('title-output');
+        let articleOutput = document.getElementById('articleOutput');
 //          默认选中方便用户删除
         titleInput.select();
 //          节流函数避免连续触发事件
-        let throttle = (method, context) => {
+        let throttle = (method) => {
             method.tId && clearTimeout(method.tId);
             method.tId = setTimeout(function () {
-                method.call(context);
-            }, 140);
+                method();
+            }, 200);
         };
 //          输出标题的函数
         let addTitle = () => {
@@ -131,27 +154,49 @@
         titleInput.addEventListener('keyup', () => {
             throttle(addTitle);
         });
+//              定义标题循环次数
+        const times = 6;
+//              处理html标签
+        const reg1 = /(<)([^>]+)(>)/g;
+//              判断是否需要循环
+        const reg2 = /^#{1,6}/gm;
+//              reg3用来循环改变标题
+        let reg3;
+//              给符合格式的创建ul和li
+        const reg4 = /(^ *|\/.+>)- (.+)/gm;
+//              去掉多余的ul
+        const reg5 = /<\/ul>\n *<ul>/g;
+
+//              给符合格式的创建ol和li
+        const reg6 = /(^ *|\/.+>)\d\. (.*)/gm;
+//              去掉多余的ol
+        const reg7 = /<\/ol>\n *<ol>/g;
+
+//              blockquote
+        const reg8 = /(^)&gt; ((.+\n?)*)/gm;
+//              代码块
+        const reg9 = /~~~([^~]*)(\n)~~~/g;
+//              br
+        const reg10 = /([^>\n]+)\n/g;
+
 //         输出文章的函数
         let addArticle = () => {
-                articleOutput.innerHTML = articleInput.value;
-                let reg1 = /#{1,6}(?=[^#]+\n)/g;
-                let len;
-                let reg2;
-                let reg3;
-                if (articleInput.value.match(reg1)) {
-                    let matchs = articleInput.value.match(reg1);
-                    len = matchs.length;
-                    console.log(matchs);
-                    console.log(len);
-                    for (let i = 0; i < len; i++) {
-                        reg3 = new RegExp(`(^|>)#{${matchs[i].length}}(?=[^#]+\\n)`, 'g');
-                        console.log(reg3);
-                        reg2 = new RegExp(`(<h${matchs[i].length}>.*)\\n`,'g');
-                        console.log(reg2);
-                        articleOutput.innerHTML = articleOutput.innerHTML.replace(reg3, `$1<h${matchs[i].length}>`).replace(reg2, `$1</h${matchs[i].length}>`);
-                    }
+            articleOutput.innerHTML = articleInput.value
+                .replace(reg1, '<<span>$2</span>>');
+
+            if (articleInput.value.match(reg2)) {
+                for (let i = times; i > 0; i--) {
+                    reg3 = new RegExp(`^(#{${i}})([^#\n]+)(\n?)`, 'gm');
+                    articleOutput.innerHTML = articleOutput.innerHTML.replace(reg3, `<h${i}>$2</h${i}>\n`);
                 }
-            };
+            }
+
+            articleOutput.innerHTML = articleOutput.innerHTML.replace(reg4, '$1<ul><li>$2</li></ul>')
+                .replace(reg5, '').replace(reg6, '$1<ol><li>$2</li></ol>')
+                .replace(reg7, '').replace(reg8, '$1<blockquote>$2</blockquote>')
+                .replace(reg9, '<pre>$1</pre>').replace(reg10, '$1<br>');
+
+        };
 
 
 //          绑定按下键盘触发
