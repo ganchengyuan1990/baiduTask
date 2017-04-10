@@ -80,7 +80,8 @@
             line-height: 1.7;
         }
 
-        #title-output {
+        #titleOutput {
+            word-wrap: break-word;
             margin-bottom: 20px;
         }
 
@@ -119,21 +120,19 @@
 <div class="left-wrapper">
     <input type="text" id="titleInput" value="无标题文章">
     <ul class="tools"></ul>
-    <textarea name="article_Input" id="articleInput"></textarea>
+    <textarea id="articleInput"></textarea>
 </div>
 <div class="right-wrapper">
     <div class="output">
-        <h1 id="title-output"></h1>
+        <h1 id="titleOutput"></h1>
         <div id="articleOutput"></div>
     </div>
 </div>
 <script>
     window.onload = () => {
 //          获取到对应的输入输出节点
-        let titleInput = document.getElementById('titleInput');
-        let articleInput = document.getElementById('articleInput');
-        let titleOutput = document.getElementById('title-output');
-        let articleOutput = document.getElementById('articleOutput');
+        const titleInput = document.getElementById('titleInput');
+        let titleOutput = document.getElementById('titleOutput');
 //          默认选中方便用户删除
         titleInput.select();
 //          节流函数避免连续触发事件
@@ -141,7 +140,7 @@
             method.tId && clearTimeout(method.tId);
             method.tId = setTimeout(function () {
                 method();
-            }, 200);
+            }, 140);
         };
 //          输出标题的函数
         let addTitle = () => {
@@ -155,29 +154,31 @@
             throttle(addTitle);
         });
 //              定义标题循环次数
-        const times = 6;
+        const circles = 6;
 //              处理html标签
         const reg1 = /(<)([^>]+)(>)/g;
 //              判断是否需要循环
-        const reg2 = /^#{1,6}/gm;
+        const reg2 = /^ *#{1,6}(( +[^\s]|[^#\s]).*)/gm;
 //              reg3用来循环改变标题
         let reg3;
 //              给符合格式的创建ul和li
-        const reg4 = /(^ *|\/.+>)- (.+)/gm;
-//              去掉多余的ul
-        const reg5 = /<\/ul>\n *<ul>/g;
-
+        const reg4 = /(^ *|<\/.+>) *- (\S).*/gm;
 //              给符合格式的创建ol和li
-        const reg6 = /(^ *|\/.+>)\d\. (.*)/gm;
-//              去掉多余的ol
-        const reg7 = /<\/ol>\n *<ol>/g;
+        const reg5 = /(^ *|\/.+>) *\d\. (\S).*/gm;
+//              去掉多余的ul、ol
+        const reg6 = /<\/([uo]l)>\n? *<\1>/g;
 
 //              blockquote
-        const reg8 = /(^)&gt; ((.+\n?)*)/gm;
+        const reg7 = /(^ *|\/.+>) *&gt; ((\S.*\n?)+)/gm;
+//              单行代码
+        const reg8 = /(^ *|\/.+>) *`([^`\n]+)`/gm;
 //              代码块
-        const reg9 = /~~~([^~]*)(\n)~~~/g;
+        const reg9 = /~~~\n((.*\n)+)~~~/g;
 //              br
         const reg10 = /([^>\n]+)\n/g;
+
+        const articleInput = document.getElementById('articleInput');
+        let articleOutput = document.getElementById('articleOutput');
 
 //         输出文章的函数
         let addArticle = () => {
@@ -185,15 +186,16 @@
                 .replace(reg1, '<<span>$2</span>>');
 
             if (articleInput.value.match(reg2)) {
-                for (let i = times; i > 0; i--) {
-                    reg3 = new RegExp(`^(#{${i}})([^#\n]+)(\n?)`, 'gm');
-                    articleOutput.innerHTML = articleOutput.innerHTML.replace(reg3, `<h${i}>$2</h${i}>\n`);
+                for (let i = circles; i > 0; i--) {
+                    reg3 = new RegExp(`^ *(#{${i}})(( +[^\s]|[^#\s]).*)(\n?)`, 'gm');
+                    articleOutput.innerHTML = articleOutput.innerHTML.replace(reg3, `<h${i}>$2</h${i}>`);
                 }
             }
 
             articleOutput.innerHTML = articleOutput.innerHTML.replace(reg4, '$1<ul><li>$2</li></ul>')
-                .replace(reg5, '').replace(reg6, '$1<ol><li>$2</li></ol>')
-                .replace(reg7, '').replace(reg8, '$1<blockquote>$2</blockquote>')
+                .replace(reg5, '$1<ol><li>$2</li></ol>').replace(reg6, '')
+                .replace(reg7, '$1<blockquote>$2</blockquote>')
+                .replace(reg8, '<pre>$2</pre>')
                 .replace(reg9, '<pre>$1</pre>').replace(reg10, '$1<br>');
 
         };
