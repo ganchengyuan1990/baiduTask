@@ -162,9 +162,9 @@
 //              reg3用来循环改变标题
         let reg3;
 //              给符合格式的创建ul和li
-        const reg4 = /(^ *|<\/.+>) *- (\S).*/gm;
+        const reg4 = /(^ *|<\/.+>) *- (\S.*)/gm;
 //              给符合格式的创建ol和li
-        const reg5 = /(^ *|\/.+>) *\d\. (\S).*/gm;
+        const reg5 = /(^ *|\/.+>) *\d\. (\S.*)/gm;
 //              去掉多余的ul、ol
         const reg6 = /<\/([uo]l)>\n? *<\1>/g;
 
