@@ -16,11 +16,11 @@
     function Vue(obj) {
         this.el = obj.el;
         this.data = obj.data;
-        Vue.prototype.init(this.el, this.data);
+        Vue.prototype._init(this.el, this.data);
     }
     Vue.prototype = {
         constructor: Vue,
-        init: (el, data) => {
+        _init: (el, data) => {
             //   判断是否有textContent属性
             if (!('textContent' in document)) {
                 console.log('Please upgrade your browser！');
