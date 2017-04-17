@@ -15,6 +15,158 @@
 
 <script>
 
+    /*
+     * 遍历属性walk
+     * 转换属性convert
+     * 需要绑定监听$watch
+     * dom渲染render
+     * 初始化init
+     * */
+
+    let Vue = function (obj) {
+        this.entry = document.querySelector(obj.el);
+//        this.walk();
+        this.data = {};
+//        this.walk(obj.data);
+        this.walk(this.data, obj.data);
+        this.init();
+        this.render = Vue.prototype.render;
+    };
+
+    /*    Vue.prototype.walk = function (obj) {
+     for (let key in obj) {
+     if (obj.hasOwnProperty(key)) {
+     if (typeof obj[key] === 'object' && obj[key] !== null) {
+     Vue.prototype.walk.call(this[key] = {}, obj[key]);
+     //                    console.log(this.__proto__);
+     } else {
+     //                    this[key]=obj[key];
+     //                    console.log(this);
+     Vue.prototype.convert.call(this, key, obj[key])
+     }
+     }
+     }
+     };*/
+
+
+    Vue.prototype.walk = function (ins, input) {
+        for (let key in input) {
+            if (input.hasOwnProperty(key)) {
+                if (typeof input[key] === 'object' && input[key] !== null) {
+                    this.walk(ins[key] = {}, input[key]);
+                } else {
+                    this.convert(ins, key, input[key]);
+                }
+            }
+        }
+    };
+
+    Vue.prototype.convert =
+        function (ins, key, value) {
+            let _value = value;
+            let that = this;
+            Object.defineProperty(ins, key, {
+                configurable: true,
+                enumerable: true,
+                get: function () {
+                    return _value;
+                },
+                set: function (newVal) {
+                    if (newVal === null || typeof newVal !== 'object') {
+                        _value = newVal;
+                        console.log('set');
+                    } else {
+                        that.walk(ins, newVal)
+                    }
+//                    that.render();
+                }
+            })
+
+        };
+
+    //        function (key, value) {
+    //            Object.defineProperty(this, key, {
+    //                configurable:true,
+    //                enumerable:true,
+    //                get:function () {
+    //                    return value;
+    //                }
+    //            })
+    //        };
+
+    /*        function (key, value) {
+     let _value = value;
+     console.log(this);
+     //                console.log(value);
+     Object.defineProperty(this, key, {
+     configurable: true,
+     enumerable: true,
+     get: function () {
+     return _value;
+     },
+     set: function (newVal) {
+     _value = newVal;
+     //                        this.render();
+     //                        console.log(that);
+     }
+     })
+     };*/
+
+
+    //            (function (key, value) {
+    //            let _value = input;
+    //            return () => {
+    //                Object.defineProperty(this, key, {
+    //                    configurable: true,
+    //                    enumerable: true,
+    //                    get: function () {
+    //                        return _value;
+    //                    },
+    //                    set: function (newVal) {
+    //                        _value = newVal;
+    //                    }
+    //                })
+    //            }
+    //        })();
+
+    Vue.prototype.$watch = function () {
+
+    };
+
+    Vue.prototype.render = function () {
+        console.log('render');
+        let domStr = this.entry.innerHTML;
+        let reg = /{{.*}}/g;
+        let templateArr = [];
+        let cache;
+//        let storage;
+        while (cache = reg.exec(domStr)) {
+            templateArr.push(cache[0]);
+        }
+        reg = /{{.*}}/;
+//        console.log(templateArr);
+        templateArr.forEach(item => {
+            cache = item.slice(2, -2).split('.');
+//            i=0;
+//            console.log(cache);
+            let storage = this.data;
+//            while(storage&&storage[cache[i++]]){
+//                storage=storage[cache[i++]]
+//            }
+//            console.log(cache);
+//            console.log(storage[cache[i]][cache[i+1]]);
+            cache.forEach(item => {
+                storage = storage[item];
+            });
+//            console.log(storage);
+            this.entry.innerHTML = this.entry.innerHTML.replace(reg, storage);
+        });
+    };
+
+    Vue.prototype.init = function () {
+        this.render();
+    };
+
 
     const app = new Vue({
         el: '#app',
