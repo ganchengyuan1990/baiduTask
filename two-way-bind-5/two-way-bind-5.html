@@ -61,7 +61,6 @@
                         that.render(that.data, that.entry);
                     } else {
                         delete ins[key];
-//                        ins[key] = {};
                         that.walk(ins[key], newVal);
                         that.render(that.data, that.entry);
                     }
@@ -70,9 +69,21 @@
         };
 
     //    用来给某个属性绑定回调函数,这个任务先不做这个了，任务二里做过了，发布-订阅呗
-//    Vue.prototype.$watch = function (attr, fn) {
-//
-//    };
+    //    Vue.prototype.$watch = function (attr, fn) {
+    //
+    //    };
+
+    //    查询某个属性在data中的值
+    Vue.prototype.find = function (key, data) {
+        for (let i = 0, len = key.length; i < len; i++) {
+            if (data.hasOwnProperty(key[i])) {
+                data = data[key[i]];
+            } else {
+                return undefined;
+            }
+        }
+        return data;
+    };
 
     //    用来渲染页面
     Vue.prototype.render = (function () {
@@ -83,18 +94,19 @@
             let domInnerHtml = domCache;
             let reg = /{{.*}}/g;
             let templateArr = [];
-            let cache;
-            while (cache = reg.exec(domCache)) {
-                templateArr.push(cache[0]);
+            let matchCache;
+            let keyCache;
+            let value;
+            while (matchCache = reg.exec(domCache)) {
+                templateArr.push(matchCache[0]);
             }
             templateArr.forEach(item => {
-                cache = item.slice(2, -2).split('.');
-                let storage = data;
-                cache.forEach(item => {
-                    storage = storage[item];
-                });
-                reg = new RegExp('{{' + cache.join('.') + '}}', 'g');
-                domInnerHtml = domInnerHtml.replace(reg, storage);
+                keyCache = item.slice(2, -2).split('.');
+                value = this.find(keyCache, data);
+                if (value !== undefined && (typeof value !== 'object' || value === null)) {
+                    reg = new RegExp('{{' + keyCache.join('.') + '}}', 'g');
+                    domInnerHtml = domInnerHtml.replace(reg, value);
+                }
             });
             entry.innerHTML = domInnerHtml;
         }
