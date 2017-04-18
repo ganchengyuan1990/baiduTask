@@ -30,20 +30,6 @@
         this.init(obj);
     };
 
-    /*    Vue.prototype.walk = function (obj) {
-     for (let key in obj) {
-     if (obj.hasOwnProperty(key)) {
-     if (typeof obj[key] === 'object' && obj[key] !== null) {
-     Vue.prototype.walk.call(this[key] = {}, obj[key]);
-     //                    console.log(this.__proto__);
-     } else {
-     //                    this[key]=obj[key];
-     //                    console.log(this);
-     Vue.prototype.convert.call(this, key, obj[key])
-     }
-     }
-     }
-     };*/
 
     //    用来遍历输入的对象
     Vue.prototype.walk = function (output, input) {
@@ -83,55 +69,10 @@
             })
         };
 
-    //        function (key, value) {
-    //            Object.defineProperty(this, key, {
-    //                configurable:true,
-    //                enumerable:true,
-    //                get:function () {
-    //                    return value;
-    //                }
-    //            })
-    //        };
-
-    /*        function (key, value) {
-     let _value = value;
-     console.log(this);
-     //                console.log(value);
-     Object.defineProperty(this, key, {
-     configurable: true,
-     enumerable: true,
-     get: function () {
-     return _value;
-     },
-     set: function (newVal) {
-     _value = newVal;
-     //                        this.render();
-     //                        console.log(that);
-     }
-     })
-     };*/
-
-
-    //            (function (key, value) {
-    //            let _value = input;
-    //            return () => {
-    //                Object.defineProperty(this, key, {
-    //                    configurable: true,
-    //                    enumerable: true,
-    //                    get: function () {
-    //                        return _value;
-    //                    },
-    //                    set: function (newVal) {
-    //                        _value = newVal;
-    //                    }
-    //                })
-    //            }
-    //        })();
-
-    //    用来给某个属性绑定回调函数
-    Vue.prototype.$watch = function (attr, fn) {
-
-    };
+    //    用来给某个属性绑定回调函数,这个任务先不做这个了，任务二里做过了，发布-订阅呗
+//    Vue.prototype.$watch = function (attr, fn) {
+//
+//    };
 
     //    用来渲染页面
     Vue.prototype.render = (function () {
@@ -166,80 +107,6 @@
     };
 
 
-    /*(function () {
-     let domCache;
-     return function () {
-     console.log('render...');
-     domCache = domCache || this.entry.innerHTML;
-     let domInnerHtml= domCache;
-     let reg = /{{.*}}/g;
-     let templateArr = [];
-     let cache;
-     //        let storage;
-     while (cache = reg.exec(domCache)) {
-     templateArr.push(cache[0]);
-     }
-     console.log(templateArr);
-     templateArr.forEach(item => {
-     cache = item.slice(2, -2).split('.');
-     //            i=0;
-     //            console.log(cache);
-     let storage = this.data;
-     //            while(storage&&storage[cache[i++]]){
-     //                storage=storage[cache[i++]]
-     //            }
-     //            console.log(cache);
-     //            console.log(storage[cache[i]][cache[i+1]]);
-     cache.forEach(item => {
-     storage = storage[item];
-     });
-     console.log(storage);
-     reg = new RegExp('{{' + cache.join('.') + '}}', 'g');
-     console.log(reg);
-     domInnerHtml = domInnerHtml.replace(reg, storage);
-     });
-     this.entry.innerHTML = domInnerHtml;
-     }
-     }());*/
-
-
-    /*
-     function () {
-     console.log('render');
-     let domStr = this.entry.innerHTML;
-     let reg = /{{.*}}/g;
-     let templateArr = [];
-     let cache;
-     //        let storage;
-     while (cache = reg.exec(domStr)) {
-     templateArr.push(cache[0]);
-     }
-     reg = /{{.*}}/;
-     //        console.log(templateArr);
-     templateArr.forEach(item => {
-     cache = item.slice(2, -2).split('.');
-     //            i=0;
-     //            console.log(cache);
-     let storage = this.data;
-     //            while(storage&&storage[cache[i++]]){
-     //                storage=storage[cache[i++]]
-     //            }
-     //            console.log(cache);
-     //            console.log(storage[cache[i]][cache[i+1]]);
-     cache.forEach(item => {
-     storage = storage[item];
-     });
-     //            console.log(storage);
-     this.entry.innerHTML = this.entry.innerHTML.replace(reg, storage);
-     });
-     };
-     */
-
-    //    Vue.prototype.init = function () {
-    //        this.render();
-    //    };
-
-
     let app = new Vue({
         el: '#app',
         data: {
@@ -252,7 +119,6 @@
         }
     });
 
-    //    app.data.user.name={firstName:'naiqian',lastName:'ren'};
 </script>
 </body>
 </html>
