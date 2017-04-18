@@ -23,14 +23,11 @@
      * 初始化init
      * */
 
+    //    Vue构造函数将要把入口(entry)和data实例化
     let Vue = function (obj) {
         this.entry = document.querySelector(obj.el);
-//        this.walk();
         this.data = {};
-//        this.walk(obj.data);
-        this.walk(this.data, obj.data);
-        this.init();
-        this.render = Vue.prototype.render;
+        this.init(obj);
     };
 
     /*    Vue.prototype.walk = function (obj) {
@@ -48,19 +45,20 @@
      }
      };*/
 
-
-    Vue.prototype.walk = function (ins, input) {
+    //    用来遍历输入的对象
+    Vue.prototype.walk = function (output, input) {
         for (let key in input) {
             if (input.hasOwnProperty(key)) {
-                if (typeof input[key] === 'object' && input[key] !== null) {
-                    this.walk(ins[key] = {}, input[key]);
+                if (typeof input[key] !== 'object' || input[key] === null) {
+                    this.convert(output, key, input[key]);
                 } else {
-                    this.convert(ins, key, input[key]);
+                    this.walk(output[key] = {}, input[key]);
                 }
             }
         }
     };
 
+    //    将输入转换成Vue实例上的访问器属性
     Vue.prototype.convert =
         function (ins, key, value) {
             let _value = value;
@@ -74,14 +72,15 @@
                 set: function (newVal) {
                     if (newVal === null || typeof newVal !== 'object') {
                         _value = newVal;
-                        console.log('set');
+                        that.render(that.data, that.entry);
                     } else {
-                        that.walk(ins, newVal)
+                        delete ins[key];
+//                        ins[key] = {};
+                        that.walk(ins[key], newVal);
+                        that.render(that.data, that.entry);
                     }
-//                    that.render();
                 }
             })
-
         };
 
     //        function (key, value) {
@@ -129,46 +128,119 @@
     //            }
     //        })();
 
-    Vue.prototype.$watch = function () {
+    //    用来给某个属性绑定回调函数
+    Vue.prototype.$watch = function (attr, fn) {
 
     };
 
-    Vue.prototype.render = function () {
-        console.log('render');
-        let domStr = this.entry.innerHTML;
-        let reg = /{{.*}}/g;
-        let templateArr = [];
-        let cache;
-//        let storage;
-        while (cache = reg.exec(domStr)) {
-            templateArr.push(cache[0]);
-        }
-        reg = /{{.*}}/;
-//        console.log(templateArr);
-        templateArr.forEach(item => {
-            cache = item.slice(2, -2).split('.');
-//            i=0;
-//            console.log(cache);
-            let storage = this.data;
-//            while(storage&&storage[cache[i++]]){
-//                storage=storage[cache[i++]]
-//            }
-//            console.log(cache);
-//            console.log(storage[cache[i]][cache[i+1]]);
-            cache.forEach(item => {
-                storage = storage[item];
+    //    用来渲染页面
+    Vue.prototype.render = (function () {
+        let domCache;
+        return function (data, entry) {
+            console.log('render...');
+            domCache = domCache || entry.innerHTML;
+            let domInnerHtml = domCache;
+            let reg = /{{.*}}/g;
+            let templateArr = [];
+            let cache;
+            while (cache = reg.exec(domCache)) {
+                templateArr.push(cache[0]);
+            }
+            templateArr.forEach(item => {
+                cache = item.slice(2, -2).split('.');
+                let storage = data;
+                cache.forEach(item => {
+                    storage = storage[item];
+                });
+                reg = new RegExp('{{' + cache.join('.') + '}}', 'g');
+                domInnerHtml = domInnerHtml.replace(reg, storage);
             });
-//            console.log(storage);
-            this.entry.innerHTML = this.entry.innerHTML.replace(reg, storage);
-        });
+            entry.innerHTML = domInnerHtml;
+        }
+    }());
+
+    //    初始化，遍历传入的对象转换成实例上的访问器，渲染一下页面
+    Vue.prototype.init = function (obj) {
+        this.walk(this.data, obj.data);
+        this.render(this.data, this.entry);
     };
 
-    Vue.prototype.init = function () {
-        this.render();
-    };
+
+    /*(function () {
+     let domCache;
+     return function () {
+     console.log('render...');
+     domCache = domCache || this.entry.innerHTML;
+     let domInnerHtml= domCache;
+     let reg = /{{.*}}/g;
+     let templateArr = [];
+     let cache;
+     //        let storage;
+     while (cache = reg.exec(domCache)) {
+     templateArr.push(cache[0]);
+     }
+     console.log(templateArr);
+     templateArr.forEach(item => {
+     cache = item.slice(2, -2).split('.');
+     //            i=0;
+     //            console.log(cache);
+     let storage = this.data;
+     //            while(storage&&storage[cache[i++]]){
+     //                storage=storage[cache[i++]]
+     //            }
+     //            console.log(cache);
+     //            console.log(storage[cache[i]][cache[i+1]]);
+     cache.forEach(item => {
+     storage = storage[item];
+     });
+     console.log(storage);
+     reg = new RegExp('{{' + cache.join('.') + '}}', 'g');
+     console.log(reg);
+     domInnerHtml = domInnerHtml.replace(reg, storage);
+     });
+     this.entry.innerHTML = domInnerHtml;
+     }
+     }());*/
 
 
-    const app = new Vue({
+    /*
+     function () {
+     console.log('render');
+     let domStr = this.entry.innerHTML;
+     let reg = /{{.*}}/g;
+     let templateArr = [];
+     let cache;
+     //        let storage;
+     while (cache = reg.exec(domStr)) {
+     templateArr.push(cache[0]);
+     }
+     reg = /{{.*}}/;
+     //        console.log(templateArr);
+     templateArr.forEach(item => {
+     cache = item.slice(2, -2).split('.');
+     //            i=0;
+     //            console.log(cache);
+     let storage = this.data;
+     //            while(storage&&storage[cache[i++]]){
+     //                storage=storage[cache[i++]]
+     //            }
+     //            console.log(cache);
+     //            console.log(storage[cache[i]][cache[i+1]]);
+     cache.forEach(item => {
+     storage = storage[item];
+     });
+     //            console.log(storage);
+     this.entry.innerHTML = this.entry.innerHTML.replace(reg, storage);
+     });
+     };
+     */
+
+    //    Vue.prototype.init = function () {
+    //        this.render();
+    //    };
+
+
+    let app = new Vue({
         el: '#app',
         data: {
             user: {
@@ -179,6 +251,8 @@
             major: 'ee'
         }
     });
+
+    //    app.data.user.name={firstName:'naiqian',lastName:'ren'};
 </script>
 </body>
 </html>
