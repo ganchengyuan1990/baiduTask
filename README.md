@@ -9,4 +9,5 @@
 * [双向绑定二](https://rennaiqian.github.io/baiduTask/two-way-bind-2/two-way-bind-2.html)
 * [双向绑定三](https://rennaiqian.github.io/baiduTask/two-way-bind-3/two-way-bind-3.html)
 * [双向绑定四](https://rennaiqian.github.io/baiduTask/two-way-bind-4/two-way-bind-4.html)
+* [双向绑定五](https://rennaiqian.github.io/baiduTask/two-way-bind-5/two-way-bind-5.html)
 * [markdown](https://rennaiqian.github.io/baiduTask/markdown/markdown.html)
